@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}{{ produto.nome }} | Loja{% endblock %}
+
+{% block content %}
+<a class="back" href="{% url 'loja:lista' %}">&larr; Voltar à loja</a>
+
+<article class="card">
+    <h1>{{ produto.nome }}</h1>
+    <p class="meta">{{ produto.categoria.nome }} · Estoque: {{ produto.estoque }}</p>
+    <p class="preco">R$ {{ produto.preco }}</p>
+    <div class="conteudo">{{ produto.descricao }}</div>
+
+    {% if produto.disponivel %}
+        <form method="post" action="{% url 'loja:adicionar' produto.id %}" class="actions">
+            {% csrf_token %}
+            <label>
+                Qtd:
+                <input type="number" name="quantidade" value="1" min="1" max="{{ produto.estoque }}" style="width:4rem;margin-left:0.35rem;">
+            </label>
+            <button class="btn" type="submit">Adicionar ao carrinho</button>
+        </form>
+    {% else %}
+        <p class="meta">Produto indisponível no momento.</p>
+    {% endif %}
+</article>
+{% endblock %}

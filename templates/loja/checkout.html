@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Checkout | Loja{% endblock %}
+
+{% block content %}
+<a class="back" href="{% url 'loja:carrinho' %}">&larr; Voltar ao carrinho</a>
+
+<h1>Checkout</h1>
+<p class="lead">Total do pedido: <strong>R$ {{ carrinho.total }}</strong></p>
+
+<form method="post" class="stack card">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button class="btn" type="submit">Confirmar pedido</button>
+</form>
+{% endblock %}

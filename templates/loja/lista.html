@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Loja | Estudos Django{% endblock %}
+
+{% block content %}
+<h1>{% if categoria_atual %}{{ categoria_atual.nome }}{% else %}Loja{% endif %}</h1>
+<p class="lead">Esqueleto de e-commerce: listagem, detalhe, carrinho e checkout.</p>
+
+<div class="chips">
+    <a href="{% url 'loja:lista' %}" class="{% if not categoria_atual %}active{% endif %}">Todas</a>
+    {% for cat in categorias %}
+        <a href="{% url 'loja:lista_categoria' cat.slug %}"
+           class="{% if categoria_atual.slug == cat.slug %}active{% endif %}">
+            {{ cat.nome }}
+        </a>
+    {% endfor %}
+</div>
+
+{% if produtos %}
+    <div class="grid">
+        {% for produto in produtos %}
+            <article class="card">
+                <h2><a href="{% url 'loja:detalhe' produto.slug %}">{{ produto.nome }}</a></h2>
+                <p class="meta">{{ produto.categoria.nome }}</p>
+                <p class="preco">R$ {{ produto.preco }}</p>
+                <p>{{ produto.descricao|truncatewords:15 }}</p>
+                <a class="btn" href="{% url 'loja:detalhe' produto.slug %}">Ver produto</a>
+            </article>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="empty">Nenhum produto nesta categoria.</div>
+{% endif %}
+{% endblock %}

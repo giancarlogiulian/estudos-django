@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Início | Estudos Django{% endblock %}
+
+{% block content %}
+<h1>Blog + Loja em Django</h1>
+<p class="lead">
+    Mesmo projeto, dois apps: <strong>blog</strong> para posts e <strong>loja</strong> para produtos,
+    carrinho e pedidos. Explore pelos links do menu.
+</p>
+
+<div class="section-title">
+    <h2>Produtos em destaque</h2>
+    <a href="{% url 'loja:lista' %}">Ver loja →</a>
+</div>
+
+{% if produtos %}
+    <div class="grid">
+        {% for produto in produtos %}
+            <article class="card">
+                <h2><a href="{% url 'loja:detalhe' produto.slug %}">{{ produto.nome }}</a></h2>
+                <p class="preco">R$ {{ produto.preco }}</p>
+                <p>{{ produto.descricao|truncatewords:12 }}</p>
+            </article>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="empty">Nenhum produto cadastrado ainda.</div>
+{% endif %}
+
+<div class="section-title">
+    <h2>Últimos posts</h2>
+    <a href="{% url 'blog:home' %}">Ver blog →</a>
+</div>
+
+{% if posts %}
+    {% for post in posts %}
+        <article class="post">
+            <h2><a href="{% url 'blog:detalhe' post.pk %}">{{ post.titulo }}</a></h2>
+            <p class="meta">{{ post.criado_em|date:"d/m/Y H:i" }}</p>
+            <p>{{ post.conteudo|truncatewords:25 }}</p>
+        </article>
+    {% endfor %}
+{% else %}
+    <div class="empty">Nenhum post publicado ainda.</div>
+{% endif %}
+{% endblock %}

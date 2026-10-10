@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Blog | Estudos Django{% endblock %}
+
+{% block content %}
+<h1>Blog</h1>
+<p class="lead">
+    Posts do app <code>blog</code>. Crie novos no
+    <a href="/admin/">admin</a>.
+</p>
+
+{% if posts %}
+    {% for post in posts %}
+        <article class="post">
+            <h2><a href="{% url 'blog:detalhe' post.pk %}">{{ post.titulo }}</a></h2>
+            <p class="meta">{{ post.criado_em|date:"d/m/Y H:i" }}</p>
+            <p>{{ post.conteudo|truncatewords:30 }}</p>
+        </article>
+    {% endfor %}
+{% else %}
+    <div class="empty">
+        Ainda não há posts. Acesse o admin, crie um Post e volte aqui.
+    </div>
+{% endif %}
+{% endblock %}

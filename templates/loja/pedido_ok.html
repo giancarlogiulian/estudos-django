@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}Pedido confirmado | Loja{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h1>Pedido #{{ pedido.pk }} criado</h1>
+    <p class="lead">
+        Obrigado, {{ pedido.nome_cliente }}! Este é um checkout de estudo
+        (sem pagamento real). Você pode acompanhar o pedido no admin.
+    </p>
+    <p class="meta">Status: {{ pedido.get_status_display }} · Total: R$ {{ pedido.total }}</p>
+    <div class="actions">
+        <a class="btn" href="{% url 'loja:lista' %}">Voltar à loja</a>
+        <a class="btn btn-secondary" href="{% url 'home' %}">Início</a>
+    </div>
+</div>
+{% endblock %}

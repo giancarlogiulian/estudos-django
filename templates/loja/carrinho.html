@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Carrinho | Loja{% endblock %}
+
+{% block content %}
+<h1>Carrinho</h1>
+
+{% if carrinho %}
+    <table>
+        <thead>
+            <tr>
+                <th>Produto</th>
+                <th>Preço</th>
+                <th>Qtd</th>
+                <th>Subtotal</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in carrinho %}
+                <tr>
+                    <td>{{ item.produto.nome }}</td>
+                    <td>R$ {{ item.preco }}</td>
+                    <td>{{ item.quantidade }}</td>
+                    <td>R$ {{ item.subtotal }}</td>
+                    <td>
+                        <form method="post" action="{% url 'loja:remover' item.produto.id %}">
+                            {% csrf_token %}
+                            <button class="btn btn-danger" type="submit">Remover</button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <p class="preco" style="margin-top:1rem;">Total: R$ {{ carrinho.total }}</p>
+
+    <div class="actions">
+        <a class="btn btn-secondary" href="{% url 'loja:lista' %}">Continuar comprando</a>
+        <a class="btn" href="{% url 'loja:checkout' %}">Finalizar pedido</a>
+    </div>
+{% else %}
+    <div class="empty">
+        Seu carrinho está vazio.
+        <div class="actions" style="justify-content:center;">
+            <a class="btn" href="{% url 'loja:lista' %}">Ir para a loja</a>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}
