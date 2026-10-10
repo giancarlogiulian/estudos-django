@@ -55,7 +55,6 @@
         padding: 0.85rem 1rem;
         border-radius: 12px;
         line-height: 1.55;
-        white-space: pre-wrap;
         word-break: break-word;
     }
 
@@ -77,6 +76,93 @@
         color: var(--muted);
         font-size: 0.9rem;
         text-align: center;
+        white-space: pre-wrap;
+    }
+
+    .bubble :first-child { margin-top: 0; }
+    .bubble :last-child { margin-bottom: 0; }
+
+    .bubble p { margin: 0.55rem 0; }
+
+    .bubble h1,
+    .bubble h2,
+    .bubble h3,
+    .bubble h4 {
+        margin: 0.9rem 0 0.45rem;
+        line-height: 1.3;
+        font-weight: 700;
+    }
+
+    .bubble h1 { font-size: 1.25rem; }
+    .bubble h2 { font-size: 1.15rem; }
+    .bubble h3 { font-size: 1.05rem; }
+    .bubble h4 { font-size: 1rem; }
+
+    .bubble ul,
+    .bubble ol {
+        margin: 0.45rem 0 0.45rem 1.2rem;
+        padding: 0;
+    }
+
+    .bubble li { margin: 0.25rem 0; }
+
+    .bubble strong { font-weight: 700; }
+    .bubble em { font-style: italic; }
+
+    .bubble hr {
+        border: none;
+        border-top: 1px solid var(--line);
+        margin: 0.9rem 0;
+    }
+
+    .bubble.user hr {
+        border-top-color: rgba(255, 255, 255, 0.35);
+    }
+
+    .bubble code {
+        font-family: Consolas, "Courier New", monospace;
+        font-size: 0.9em;
+        background: rgba(0, 0, 0, 0.06);
+        padding: 0.1rem 0.35rem;
+        border-radius: 4px;
+    }
+
+    .bubble.user code {
+        background: rgba(255, 255, 255, 0.18);
+    }
+
+    .bubble pre {
+        overflow-x: auto;
+        background: rgba(0, 0, 0, 0.06);
+        border-radius: 8px;
+        padding: 0.75rem;
+        margin: 0.6rem 0;
+    }
+
+    .bubble.user pre {
+        background: rgba(255, 255, 255, 0.12);
+    }
+
+    .bubble pre code {
+        background: transparent;
+        padding: 0;
+    }
+
+    .bubble blockquote {
+        margin: 0.6rem 0;
+        padding-left: 0.85rem;
+        border-left: 3px solid var(--line);
+        color: var(--muted);
+    }
+
+    .bubble.user blockquote {
+        border-left-color: rgba(255, 255, 255, 0.45);
+        color: rgba(255, 255, 255, 0.9);
+    }
+
+    .bubble a {
+        color: inherit;
+        text-decoration: underline;
     }
 
     .chat-form {
@@ -108,7 +194,7 @@
 <h1>ChatBot (Ollama)</h1>
 <p class="lead">
     Conversa com os modelos instalados no seu Ollama local.
-    Escolha o modelo, envie a mensagem e o histórico fica na sessão do navegador.
+    Respostas em Markdown são renderizadas (negrito, títulos, listas, código, etc.).
 </p>
 
 {% if erro_modelos %}
@@ -134,15 +220,7 @@
         <button type="button" class="btn btn-secondary" id="btn-limpar">Limpar conversa</button>
     </div>
 
-    <div class="chat-window" id="chat-window" aria-live="polite">
-        {% for msg in historico %}
-            <div class="bubble {{ msg.role }}">{{ msg.content }}</div>
-        {% empty %}
-            <div class="bubble system" id="placeholder">
-                Nenhuma mensagem ainda. Escolha um modelo e digite abaixo.
-            </div>
-        {% endfor %}
-    </div>
+    <div class="chat-window" id="chat-window" aria-live="polite"></div>
 
     <form class="chat-form" id="chat-form">
         {% csrf_token %}
@@ -153,6 +231,10 @@
     <p class="status-line" id="status"></p>
 </div>
 
+{{ historico|json_script:"chat-historico" }}
+
+<script src="https://cdn.jsdelivr.net/npm/marked@15.0.7/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.4/dist/purify.min.js"></script>
 <script>
 (function () {
     const form = document.getElementById("chat-form");
@@ -163,10 +245,32 @@
     const btnEnviar = document.getElementById("btn-enviar");
     const btnLimpar = document.getElementById("btn-limpar");
     const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
+    const historicoInicial = JSON.parse(document.getElementById("chat-historico").textContent);
+
+    marked.setOptions({
+        gfm: true,
+        breaks: true,
+    });
+
+    function renderMarkdown(text) {
+        const raw = marked.parse(text || "");
+        return DOMPurify.sanitize(raw, {
+            USE_PROFILES: { html: true },
+        });
+    }
 
     function setStatus(text, isError) {
         statusEl.textContent = text || "";
         statusEl.classList.toggle("error", !!isError);
+    }
+
+    function showPlaceholder(text) {
+        windowEl.innerHTML = "";
+        const bubble = document.createElement("div");
+        bubble.className = "bubble system";
+        bubble.id = "placeholder";
+        bubble.textContent = text;
+        windowEl.appendChild(bubble);
     }
 
     function appendBubble(role, content) {
@@ -175,9 +279,23 @@
 
         const bubble = document.createElement("div");
         bubble.className = "bubble " + role;
-        bubble.textContent = content;
+
+        if (role === "system") {
+            bubble.textContent = content;
+        } else {
+            bubble.innerHTML = renderMarkdown(content);
+        }
+
         windowEl.appendChild(bubble);
         windowEl.scrollTop = windowEl.scrollHeight;
+    }
+
+    if (historicoInicial.length) {
+        historicoInicial.forEach(function (msg) {
+            appendBubble(msg.role, msg.content);
+        });
+    } else {
+        showPlaceholder("Nenhuma mensagem ainda. Escolha um modelo e digite abaixo.");
     }
 
     form.addEventListener("submit", async function (event) {
@@ -224,7 +342,7 @@
                 headers: { "X-CSRFToken": csrfToken },
             });
             if (!response.ok) throw new Error("Não foi possível limpar.");
-            windowEl.innerHTML = '<div class="bubble system" id="placeholder">Conversa limpa. Pode começar de novo.</div>';
+            showPlaceholder("Conversa limpa. Pode começar de novo.");
             setStatus("Histórico limpo.");
         } catch (err) {
             setStatus(err.message, true);
