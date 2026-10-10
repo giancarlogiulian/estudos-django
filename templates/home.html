@@ -3,10 +3,11 @@
 {% block title %}Início | Estudos Django{% endblock %}
 
 {% block content %}
-<h1>Blog + Loja em Django</h1>
+<h1>Blog + Loja + ChatBot</h1>
 <p class="lead">
-    Mesmo projeto, dois apps: <strong>blog</strong> para posts e <strong>loja</strong> para produtos,
-    carrinho e pedidos. Explore pelos links do menu.
+    Mesmo projeto com três apps: <strong>blog</strong>, <strong>loja</strong> e
+    <strong>chatbot</strong> (Ollama). Explore pelos links do menu —
+    <a href="{% url 'chatbot:chat' %}">abrir ChatBot</a>.
 </p>
 
 <div class="section-title">

@@ -8,4 +8,5 @@ urlpatterns = [
     path("", home, name="home"),
     path("blog/", include("blog.urls")),
     path("loja/", include("loja.urls")),
+    path("chatbot/", include("chatbot.urls")),
 ]

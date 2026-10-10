@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'blog',
     'loja',
+    'chatbot',
 ]
 
 MIDDLEWARE = [
@@ -128,3 +129,8 @@ MAILERS = {
         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
     },
 }
+
+
+# Ollama (ChatBot local)
+OLLAMA_BASE_URL = 'http://127.0.0.1:11434'
+OLLAMA_TIMEOUT = 300
